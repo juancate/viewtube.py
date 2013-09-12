@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python2
 
-import time, os.path
+import time, os.path, json
 from subprocess import Popen, PIPE
 
 # function to get the video name base on its youtube url.
@@ -14,36 +14,48 @@ def get_file_name(url, youtube_dl_path=''):
   return name
 
 # function to download and playback a youtube video
-# TODO kill process when player is closed
-def play_video(name, url, player_args, delay=5, youtube_dl_path=None):
+def play_video(name, url, player_args, delay=5, opt=dict()):
+  download_process = None
+
   if os.path.isfile(name):
     player_args = player_args[:-6] + '"'
   else:
     print('Downloading...')
-    if youtube_dl_path is not None:
-      args_download = youtube_dl_path
-    args_download += 'youtube-dl -q -o "%s" %s' % (name, url)
+    download_args = opt['youtube_dl_path']
+    download_args += 'youtube-dl -q -c -o "%s" -f %s %s' % (name, opt['quality'], url)
 
-    log_download = file("/tmp/.log_youtube-dl", "w")
-    download_process = Popen(args_download, shell=True,
-                             stdout=log_download, stderr=log_download)
+    download_process = Popen(download_args, shell=True)
 
     time.sleep(delay) # waits while the download starts.
 
-  log_player = file("/tmp/.log_simpleviewer", "w")
-  player_process = Popen(player_args, shell=True,
-                         stdout=log_player, stderr=log_player)
+  player_process = Popen(player_args, shell=True)
 
-  if player_process.wait():
-    player_process.terminate()
+  if player_process.wait() is not None:
+    if download_process is not None:
+      download_process.terminate()
+
+# load configuration file
+def load_config():
+  config = json.load(open('config.json'))
+
+  if 'player_path' not in config:
+    config['player_path'] = 'mplayer'
+  if 'youtube_dl_path' not in config:
+    config['youtube_dl_path'] = ''
+  if 'download_path' not in config:
+    config['download_path'] = '/tmp'
+
+  return config
+
 
 # main function
 if __name__ == '__main__':
   from os import sys
 
-  youtube_dl_path = '$HOME/bin/'
-  video_name      = get_file_name(sys.argv[1], youtube_dl_path)
-  video_name      = '/tmp/' + video_name
-  player_args     = 'mplayer "%s.part"' % video_name
+  config = load_config()
 
-  play_video(video_name, sys.argv[1], player_args, youtube_dl_path=youtube_dl_path)
+  video_name      = get_file_name(sys.argv[1], config['youtube_dl_path'])
+  video_name      = config['download_path'] + '/' + video_name
+  player_args     = '%s "%s.part"' % (config['player_path'], video_name)
+
+  play_video(name=video_name, url=sys.argv[1], player_args=player_args, opt=config)
