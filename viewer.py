@@ -5,8 +5,8 @@ import time, os.path
 from subprocess import Popen, PIPE
 
 # function to get the video name base on its youtube url.
-def get_file_name(url):
-  args = ['youtube-dl', '--get-filename',
+def get_file_name(url, youtube_dl_path=''):
+  args = [youtube_dl_path + 'youtube-dl', '--get-filename',
           '-o', '"%(title)s.%(ext)s"', url]
 
   process = Popen(args, stdout=PIPE)
@@ -40,9 +40,10 @@ def play_video(name, url, player_args, delay=5, youtube_dl_path=None):
 # main function
 if __name__ == '__main__':
   from os import sys
-  video_name      = get_file_name(sys.argv[1])
+
+  youtube_dl_path = '$HOME/bin/'
+  video_name      = get_file_name(sys.argv[1], youtube_dl_path)
   video_name      = '"/tmp/' + video_name[1:]
   player_args     = 'mplayer %s.part' % video_name
-  youtube_dl_path = '$HOME/bin/'
 
   play_video(video_name, sys.argv[1], player_args, youtube_dl_path=youtube_dl_path)
