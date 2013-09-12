@@ -9,9 +9,9 @@ def get_file_name(url, youtube_dl_path=''):
   args = [youtube_dl_path + 'youtube-dl', '--get-filename',
           '-o', '"%(title)s.%(ext)s"', url]
 
-  process = Popen(args, stdout=PIPE)
+  process = Popen(' '.join(args), stdout=PIPE, shell=True)
   name = process.communicate()[0][:-1]
-  return name
+  return '"%s"' % name
 
 # function to download and playback a youtube video
 # TODO kill process when player is closed
