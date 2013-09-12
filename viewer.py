@@ -6,10 +6,10 @@ from subprocess import Popen, PIPE
 
 # function to get the video name base on its youtube url.
 def get_file_name(url, youtube_dl_path=''):
-  args = [youtube_dl_path + 'youtube-dl', '--get-filename',
-          '-o', '"%(title)s.%(ext)s"', url]
+  args = youtube_dl_path + 'youtube-dl '
+  args += '--get-filename -o "%(title)s.%(ext)s" ' + url
 
-  process = Popen(' '.join(args), stdout=PIPE, shell=True)
+  process = Popen(args, stdout=PIPE, shell=True)
   name = process.communicate()[0][:-1]
   return name
 
@@ -54,8 +54,8 @@ if __name__ == '__main__':
 
   config = load_config()
 
-  video_name      = get_file_name(sys.argv[1], config['youtube_dl_path'])
-  video_name      = config['download_path'] + '/' + video_name
-  player_args     = '%s "%s.part"' % (config['player_path'], video_name)
+  video_name  = get_file_name(sys.argv[1], config['youtube_dl_path'])
+  video_name  = config['download_path'] + '/' + video_name
+  player_args = '%s "%s.part"' % (config['player_path'], video_name)
 
   play_video(name=video_name, url=sys.argv[1], player_args=player_args, opt=config)
