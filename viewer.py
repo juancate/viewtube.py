@@ -11,18 +11,18 @@ def get_file_name(url, youtube_dl_path=''):
 
   process = Popen(' '.join(args), stdout=PIPE, shell=True)
   name = process.communicate()[0][:-1]
-  return '"%s"' % name
+  return name
 
 # function to download and playback a youtube video
 # TODO kill process when player is closed
 def play_video(name, url, player_args, delay=5, youtube_dl_path=None):
   if os.path.isfile(name):
-    player_args = player_args[:-5]
+    player_args = player_args[:-6] + '"'
   else:
     print('Downloading...')
     if youtube_dl_path is not None:
       args_download = youtube_dl_path
-    args_download += 'youtube-dl -q -o %s %s' % (name, url)
+    args_download += 'youtube-dl -q -o "%s" %s' % (name, url)
 
     log_download = file("/tmp/.log_youtube-dl", "w")
     download_process = Popen(args_download, shell=True,
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
   youtube_dl_path = '$HOME/bin/'
   video_name      = get_file_name(sys.argv[1], youtube_dl_path)
-  video_name      = '"/tmp/' + video_name[1:]
-  player_args     = 'mplayer %s.part' % video_name
+  video_name      = '/tmp/' + video_name
+  player_args     = 'mplayer "%s.part"' % video_name
 
   play_video(video_name, sys.argv[1], player_args, youtube_dl_path=youtube_dl_path)
