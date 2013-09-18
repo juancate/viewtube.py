@@ -1,5 +1,6 @@
 {
   "player_path" : "mplayer",
   "youtube_dl_path" : "$HOME/bin/",
-  "quality" : "35/18"
+  "quality" : "35/18",
+  "delay" : "7"
 }

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 import time, os.path, json
 from subprocess import Popen, PIPE
@@ -8,13 +8,15 @@ from subprocess import Popen, PIPE
 def get_file_name(url, youtube_dl_path=''):
   args = youtube_dl_path + 'youtube-dl '
   args += '--get-filename -o "%(title)s.%(ext)s" ' + url
+  args += ' --restrict-filenames'
 
   process = Popen(args, stdout=PIPE, shell=True)
   name = process.communicate()[0][:-1]
+
   return name
 
 # function to download and playback a youtube video
-def play_video(name, url, player_args, delay=5, opt=dict()):
+def play_video(name, url, player_args, opt):
   download_process = None
 
   if os.path.isfile(name):
@@ -26,9 +28,10 @@ def play_video(name, url, player_args, delay=5, opt=dict()):
 
     download_process = Popen(download_args, shell=True)
 
-    time.sleep(delay) # waits while the download starts.
+    time.sleep(config['delay']) # waits while the download starts.
 
-  player_process = Popen(player_args, shell=True)
+  print('Playing: %s' % config['video'])
+  player_process = Popen(player_args, shell=True, stdout=PIPE)
 
   if player_process.wait() is not None:
     if download_process is not None:
@@ -36,7 +39,8 @@ def play_video(name, url, player_args, delay=5, opt=dict()):
 
 # load configuration file
 def load_config():
-  config = json.load(open('config.json'))
+  real_path = os.path.dirname(os.path.realpath(__file__))
+  config = json.load(open(real_path + '/config.json'))
 
   if 'player_path' not in config:
     config['player_path'] = 'mplayer'
@@ -44,9 +48,11 @@ def load_config():
     config['youtube_dl_path'] = ''
   if 'download_path' not in config:
     config['download_path'] = '/tmp'
+  if 'delay' not in config:
+    config['delay'] = '5'
+  config['delay'] = int(config['delay'])
 
   return config
-
 
 # main function
 if __name__ == '__main__':
@@ -55,6 +61,7 @@ if __name__ == '__main__':
   config = load_config()
 
   video_name  = get_file_name(sys.argv[1], config['youtube_dl_path'])
+  config['video'] = video_name
   video_name  = config['download_path'] + '/' + video_name
   player_args = '%s "%s.part"' % (config['player_path'], video_name)
 
