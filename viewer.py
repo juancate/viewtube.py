@@ -43,9 +43,9 @@ def play_video(name, url, player_args, opt):
 
     download_process = Popen(download_args, shell=True)
 
-    time.sleep(config['delay'])  # waits while the download starts.
+    time.sleep(opt['delay'])  # waits while the download starts.
 
-    print('Playing: %s' % config['video'])
+    print('Playing: %s' % opt['video'])
     player_process = Popen(player_args, shell=True, stdout=PIPE)
 
     if player_process.wait() is not None:
@@ -57,17 +57,18 @@ def load_config():
     """
     Load configuration file.
     """
-    real_path = os.path.dirname(os.path.realpath(__file__))
-    config = json.load(open(real_path + '/config.json'))
+    default = {
+        'player_path': 'mplayer',
+        'youtube_dl_path': '',
+        'download_path': '/tmp',
+        'delay': '5'
+    }
 
-    if 'player_path' not in config:
-        config['player_path'] = 'mplayer'
-    if 'youtube_dl_path' not in config:
-        config['youtube_dl_path'] = ''
-    if 'download_path' not in config:
-        config['download_path'] = '/tmp'
-    if 'delay' not in config:
-        config['delay'] = '5'
+    real_path = os.path.dirname(os.path.realpath(__file__))
+    with open(real_path + '/config.json') as config_file:
+        config = json.load(config_file)
+
+    config = dict(list(default.items()) + list(config.items()))
     config['delay'] = int(config['delay'])
 
     return config
