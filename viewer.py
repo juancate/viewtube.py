@@ -37,13 +37,13 @@ def play_video(name, url, player_args, opt):
         player_args = player_args[:-6] + '"'
     else:
         print('Downloading...')
-    download_args = opt['youtube_dl_path']
-    download_args += 'youtube-dl -q -c -o "%s" -f %s %s' % \
-                     (name, opt['quality'], url)
+        download_args = opt['youtube_dl_path']
+        download_args += 'youtube-dl -q -c -o "%s" -f %s %s' % \
+                         (name, opt['quality'], url)
 
-    download_process = Popen(download_args, shell=True)
+        download_process = Popen(download_args, shell=True)
 
-    time.sleep(opt['delay'])  # waits while the download starts.
+        time.sleep(opt['delay'])  # waits while the download starts.
 
     print('Playing: %s' % opt['video'])
     player_process = Popen(player_args, shell=True, stdout=PIPE)
