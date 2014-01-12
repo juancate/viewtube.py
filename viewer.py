@@ -65,8 +65,14 @@ def load_config():
     }
 
     real_path = os.path.dirname(os.path.realpath(__file__))
-    with open(real_path + '/config.json') as config_file:
-        config = json.load(config_file)
+
+    try:
+        with open(real_path + '/config.json') as config_file:
+            config = json.load(config_file)
+    except Exception as e:
+        import sys
+        print('%s\nCreate your configuration file.' % e)
+        sys.exit(1)
 
     config = dict(list(default.items()) + list(config.items()))
     config['delay'] = int(config['delay'])
