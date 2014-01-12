@@ -1,4 +1,4 @@
-config.json
+/config.json
 *.py[cod]
 
 # C extensions
